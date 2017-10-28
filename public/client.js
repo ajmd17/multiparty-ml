@@ -26,12 +26,16 @@ class Client {
   constructor(trainingData, numIterations) {
     this.trainingData = trainingData;
     this.numIterations = numIterations;
+
+    this._callbacks = {
+      /** @param {Model} model */
+      onIterationCompleted: (model) => {}
+    };
   }
 
-  callbacks = {
-    /** @param {Model} model */
-    onIterationCompleted: (model) => {}
-  };
+  get callbacks() {
+    return this._callbacks;
+  }
 
   _nextIter() {
     for (let i = 0; i < this.trainingData.outputValues.length; i++) {
