@@ -1,24 +1,28 @@
-/**
- * @param {number[][]} inputValues 
- * @param {number[][]} outputValues 
- */
-function TrainingData(inputValues, outputValues) {
-  this.inputValues = inputValues;
-  this.outputValues = outputValues;
+class TrainingData {
+  /**
+   * @param {number[][]} inputValues 
+   * @param {number[][]} outputValues 
+   */
+  constructor(inputValues, outputValues) {
+    this.inputValues = inputValues;
+    this.outputValues = outputValues;
+  }
+
+  extractRow() {
+
+  }
 }
 
-TrainingData.prototype.extractRow = function () {
-
-};
-
-function Model() {
-  /** @type {{ w: number[][], v: number[] }} */
-  this.weights = { w: [], v: [] };
-  /** @type {number[]} */
-  this.bias = [];
+class Model {
+  constructor() {
+    /** @type {{ w: number[][], v: number[] }} */
+    this.weights = { w: [], v: [] };
+    /** @type {number[]} */
+    this.bias = [];
+  }
 }
 
-class Client {
+class Trainer {
   /**
    * @param {TrainingData} trainingData
    * @param {number} numIterations
@@ -49,3 +53,5 @@ class Client {
     });
   }
 }
+
+export default Trainer;

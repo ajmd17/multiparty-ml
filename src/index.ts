@@ -40,6 +40,22 @@ const app = express();
 const server = http.createServer(app);
 const wss = new ws.Server({ server });
 
+app.get('/api/arenas/:id', (req, res) => {
+  const arena = arenas[req.params.id];
+
+  if (arena == null) {
+    return res.sendStatus(404);
+  }
+
+  res.json({
+    arena: {
+      id: req.params.id,
+      state: arena.state,
+      numActiveClients: arena.connectedClients.length
+    }
+  });
+});
+
 app.get('/active-arenas', (req, res) => {
   let arenasList = [];
 
@@ -77,7 +93,10 @@ app.get('/arenas/:id/train', (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use('/js', express.static(path.join(__dirname, '..', 'lib', 'public', 'js')));
+app.use(/\/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
 
 wss.on('connection', (socket) => {
   let connection = new ClientConnection(crypto.randomBytes(20).toString('hex'), socket);
@@ -93,13 +112,15 @@ wss.on('connection', (socket) => {
     }
 
     switch (msgObject.type) {
-      case 'arena.join':
+      case 'join arena':
         if (arenas[msgObject.arenaId] == null) {
           console.error('No arena with id "' + msgObject.arenaId + '"');
         } else {
           arenas[msgObject.arenaId].connectClient(connection);
         }
 
+        break;
+      case 'subscribe to arena':
         break;
       default:
         console.error('Unrecognized message type: "' + msgObject.type + '"');

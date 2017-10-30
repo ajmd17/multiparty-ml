@@ -12,11 +12,13 @@
     "target": "es5",
     "removeComments": true,
     "rootDir": "./src",
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "jsx": "react"
   },
   "exclude": [
     "node_modules/*",
     "lib/*",
-    "public/**"
+    "webpack.production.config.js",
+    "webpack.config.js"
   ]
 }
