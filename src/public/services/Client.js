@@ -1,62 +1,42 @@
+import { Trainer, TrainingData } from './Trainer';
+
 const Client = {
-  _ws: null,
+  _trainer: null,
+
+  _socket: null,
 
   /** @type {{[key: string]: Function[]}} */
   _listeners: {},
 
   init() {
-    this._ws = new WebSocket('ws://localhost:8080');
-    this._ws.onmessage = (msg) => {
-      let parsed = JSON.parse(msg.data);
-
-      if (parsed.type) {
-        let handlers = [];
-
-        for (let key in Client._listeners) {
-          if (key == parsed.type) {
-            handlers = Client._listeners[key];
-            break;
-          }
-        }
-
-        if (handlers.length == 0) {
-          console.warn(`No handlers for message type "${parsed.type}"`);
-          return;
-        }
-
-        for (let handler of handlers) {
-          handler(parsed);
-        }
-      }
-    };
+    this._socket = io();
+    this._socket.on('receive init data', ({ inputData, outputData }) => {
+      this._trainer = new Trainer(new TrainingData(inputData, outputData));
+    });
   },
 
-  on(key, fn) {
-    let index = -1;
-
-    if (!this._listeners[key]) {
-      this._listeners[key] = [fn];
-      index = 0;
-    } else {
-      index = this._listeners[key].push(fn) - 1;
-    }
+  on(name, fn) {
+    this._socket.on(name, fn);
 
     return {
-      remove: (function remove(key, index) {
-        Client._listeners[key].splice(index, 1);
-      }).bind(key, index)
+      remove: (function (name, fn) {
+        Client._socket.off(name, fn);
+      }).bind(name, fn)
     };
   },
 
-  send(type, data) {
-    this._ws.send(JSON.stringify({
-      type,
-      ...data
-    }));
+  send(msg, ...data) {
+    this._socket.emit(msg, ...data);
   },
 
-  joinArena(arenaId) {
-    this.send('join arena', { arenaId });
+  Arena: {
+    join(arenaId) {
+      Client._socket.emit('join arena', arenaId);
+    },
+
+    startTraining(arenaId) {
+      Client._socket.emit('start training', arenaId);
+    }
   }
 };
 

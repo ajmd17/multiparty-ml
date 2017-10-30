@@ -8,59 +8,7 @@
     <div id="active-arenas-list">
     </div> -->
 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/js/dist.js"></script>
-
-    <script>
-      let ws = new WebSocket(`ws://localhost:8080`);
-      
-      function joinArena(id) {
-        ws.send(JSON.stringify({
-          type: 'arena.join',
-          arenaId: id
-        }));
-      }
-
-      
-      ws.onmessage = (msg) => {
-        let parsed = JSON.parse(msg.data);
-
-        console.log(parsed);
-
-        switch (parsed.type) {
-          case 'data.init':
-            break;
-        }
-      };
-    </script>
-
-    <script>
-      fetch('/active-arenas')
-      .then(resp => resp.json())
-      .then((json) => {
-        let activeArenasList = document.getElementById('active-arenas-list');
-        activeArenasList.innerHTML = '';
-
-        json.forEach((el) => {
-          let div = document.createElement('div');
-          let title = document.createElement('span');
-          title.innerHTML = el.name || el.id;
-
-          if (el.numActiveClients != null) {
-            title.innerHTML += ' (' + el.numActiveClients + ' active clients)';
-          }
-
-          div.appendChild(title);
-
-          let button = document.createElement('button');
-          button.innerText = 'Join';
-          button.onclick = joinArena.bind(null, el.id);
-          div.appendChild(button);
-
-          activeArenasList.appendChild(div);
-        });
-      }).catch((err) => {
-        document.getElementById('active-arenas-list').innerHTML = 'Failed to get active arenas: "' + err.message + '"'; 
-      });
-    </script>
   </body>
 </html>

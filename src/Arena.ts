@@ -8,13 +8,14 @@ enum ArenaState {
   TRAINING,
   COMPLETED
 }
+
 class Arena {
   private _processingModelData: ProcessingModelData;
   private _state: ArenaState = ArenaState.IDLE;
 
   connectedClients: ClientConnection[];
 
-  constructor(activeModel?: Model) {
+  constructor(public id: string, activeModel?: Model) {
     this.connectedClients = [];
     this._initProcessingModelData(activeModel);
   }
@@ -53,6 +54,10 @@ class Arena {
     }
 
     return -1;
+  }
+
+  hasClient(client: ClientConnection) {
+    return this._indexOfClient(client) !== -1;
   }
 
   connectClient(client: ClientConnection) {
@@ -101,6 +106,14 @@ class Arena {
     this.connectedClients.forEach((client, i) => {
       client.sendInitData(inputSplit[i], outputSplit[i]);
     });
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      state: this.state,
+      numActiveClients: this.connectedClients.length
+    };
   }
 }
 

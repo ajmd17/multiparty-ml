@@ -54,4 +54,4 @@ class Trainer {
   }
 }
 
-export default Trainer;
+export { TrainingData, Trainer };

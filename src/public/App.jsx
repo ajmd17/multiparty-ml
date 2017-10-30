@@ -6,7 +6,7 @@ import Client from './services/Client';
 import Router from './Router';
 
 class App extends React.Component {
-  componentDidMount() {
+  componentWillMount() {
     Client.init();
   }
 

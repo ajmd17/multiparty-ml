@@ -1,13 +1,12 @@
 import Data from './Data';
-import * as WebSocket from 'ws';
 
 class ClientConnection {
-  private _socket: WebSocket;
+  private _socket: SocketIO.Socket;
   private _id: string;
 
   completedIterations: number = 0;
 
-  constructor(id: string, socket: WebSocket) {
+  constructor(id: string, socket: SocketIO.Socket) {
     this._id = id;
     this._socket = socket;
   }
@@ -17,11 +16,10 @@ class ClientConnection {
   }
 
   sendInitData(inputData: Data, outputData: Data) {
-    this._socket.send(JSON.stringify({
-      type: 'data.init',
+    this._socket.emit('receive init data', {
       inputData: inputData.values,
       outputData: outputData.values
-    }));
+    });
   }
 }
 

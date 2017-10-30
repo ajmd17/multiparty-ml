@@ -2,6 +2,25 @@ import DataType from './DataType';
 import { SchemaField, NumericalField, CategoricalField } from './SchemaField';
 
 class Data {
+  static readonly DEFAULT_INPUT_DATA = new Data([
+    new NumericalField('x'),
+    new NumericalField('y')
+  ], [
+    [1.2, 2.4],
+    [1.6, 6,7],
+    [1.8, 8.9],
+    [0.5, 4.1]
+  ]);
+    
+  static readonly DEFAULT_OUTPUT_DATA = new Data([
+    new NumericalField('z')
+  ], [
+    [0],
+    [1],
+    [1],
+    [0]
+  ]);
+
   constructor(public schema: SchemaField[], public values: (number|string)[][]) {
   }
 

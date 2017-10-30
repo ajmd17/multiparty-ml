@@ -7,14 +7,16 @@ import Trainer from '../../services/Trainer';
 
 class ArenaScreen extends React.Component {
   state = {
-    arena: null
+    arena: null,
+    joined: false
   };
 
   componentDidMount() {
-    Client.send('subscribe to arena', { arenaId: this.props.match.params.id });
+    Client.send('subscribe to arena', this.props.match.params.id);
 
     this.arenaListener = Client.on('update arena', (arena) => {
       this.setState({ arena });
+      console.log('update arena: ', arena);
     });
 
     axios.get(`/api/arenas/${this.props.match.params.id}`)
@@ -25,16 +27,17 @@ class ArenaScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    Client.send('unsubscribe from arena', { arenaId: this.props.match.params.id });
+    Client.send('unsubscribe from arena', this.props.match.params.id);
     this.arenaListener.remove();
   }
 
   handleJoinClick = () => {
-    Client.joinArena(this.state.arena.id);
+    Client.Arena.join(this.state.arena.id);
+    this.setState({ joined: true });
   };
 
   handleStartTrainingClick = () => {
-
+    Client.Arena.startTraining(this.state.arena.id);
   };
 
   render() {
@@ -49,11 +52,16 @@ class ArenaScreen extends React.Component {
     return (
       <div>
         <h3>{this.state.arena.id}</h3>
-        {['Idle', 'Training', 'Completed'][this.state.arena.state]}
-        <button onClick={this.handleJoinClick}>
+        <span>
+          {this.state.arena.numActiveClients} active clients
+        </span>
+        <div>
+          {['Idle', 'Training', 'Completed'][this.state.arena.state]}
+        </div>
+        <button disabled={this.state.arena.state != 0 || this.state.joined} onClick={this.handleJoinClick}>
           Join
         </button>
-        <button onClick={this.handleStartTrainingClick}>
+        <button disabled={this.state.arena.state != 0} onClick={this.handleStartTrainingClick}>
           Commence Training
         </button>
       </div>
