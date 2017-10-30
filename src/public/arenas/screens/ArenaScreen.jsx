@@ -19,6 +19,23 @@ class ArenaScreen extends React.Component {
       console.log('update arena: ', arena);
     });
 
+    this.startTrainingListener = Client.on('start training', (modelData) => {
+      if (Client.trainer == null) {
+        throw Error('Client.trainer is null, init data not yet received.');
+      }
+
+      Client.trainer.beginTraining(modelData,
+        {
+          onIteration: (deltas) => {
+            console.log('deltas : ', deltas);
+          },
+          onDone: (results) => {
+            console.log('results = ', results);
+          }
+        }
+      );
+    });
+
     axios.get(`/api/arenas/${this.props.match.params.id}`)
     .then(res => res.data)
     .then(({ arena }) => {

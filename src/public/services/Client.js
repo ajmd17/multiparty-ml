@@ -15,6 +15,13 @@ const Client = {
     });
   },
 
+  /**
+   * @returns {Trainer}
+   */
+  get trainer() {
+    return this._trainer;
+  },
+
   on(name, fn) {
     this._socket.on(name, fn);
 
@@ -35,7 +42,7 @@ const Client = {
     },
 
     startTraining(arenaId) {
-      Client._socket.emit('start training', arenaId);
+      Client._socket.emit('request start training', arenaId);
     }
   }
 };

@@ -1,8 +1,6 @@
-import { ModelData, WeightData } from './ModelData';
+import { ModelData, WeightData } from './shared/ModelData';
 
-class Model implements ModelData {
-  weights: WeightData;
-  bias: number[];
+class Model extends ModelData {
 }
 
 export default Model;

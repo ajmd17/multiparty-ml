@@ -6,7 +6,9 @@ import Model from './Model';
 
 export default new class Arenas {
   arenas: { [id: string]: Arena } = {
-    'testing-testing-testing': new Arena('testing-testing-testing', new Model())
+    'testing-testing-testing': new Arena('testing-testing-testing', new Model({
+      w: [], v: []
+    }, []))
   };
 
   add(arena: Arena) {

@@ -1,5 +1,5 @@
 import Model from './Model';
-import { ProcessingModelData } from './ModelData';
+import { ProcessingModelData } from './shared/ModelData';
 import Data from './Data';
 import ClientConnection from './ClientConnection';
 
@@ -22,22 +22,30 @@ class Arena {
 
   private _initProcessingModelData(activeModel?: Model) {
     if (activeModel) {
-      this._processingModelData = {
-        weights: activeModel.weights,
-        bias: activeModel.bias,
-        deltaBias: 0.0
-      };
+      this.activeModel = activeModel;
     } else {
-      this._processingModelData = {
-        weights: { w: [], v: [] },
-        bias: [],
-        deltaBias: 0.0
-      };
+      this._processingModelData = new ProcessingModelData(
+        { w: [], v: [] },
+        [],
+        0.0
+      );
     }
   }
 
   get state() {
     return this._state;
+  }
+
+  get activeModel() {
+    return this._processingModelData;
+  }
+
+  set activeModel(model: Model) {
+    this._processingModelData = new ProcessingModelData(
+      model.cloneWeights(),
+      model.cloneBias(),
+      0.0
+    );
   }
 
   private _indexOfClient(client: ClientConnection) {
@@ -97,6 +105,8 @@ class Arena {
       case ArenaState.COMPLETED:
         throw Error('Training already completed');
     }
+
+    this._processingModelData.initialize(inputData.values[0].length);
 
     this._state = ArenaState.TRAINING;
 

@@ -27,7 +27,7 @@ export default function Sockets(io: SocketIO.Server) {
       }
     });
 
-    socket.on('start training', (arenaId) => {
+    socket.on('request start training', (arenaId) => {
       const arena = Arenas.get(arenaId);
 
       if (!arena) {
@@ -38,6 +38,7 @@ export default function Sockets(io: SocketIO.Server) {
       try {
         arena.beginTraining(Data.DEFAULT_INPUT_DATA, Data.DEFAULT_OUTPUT_DATA);
         io.in(`arena_${arena.id}`).emit('update arena', arena.toJSON());
+        io.in(`arena_${arena.id}`).emit('start training', arena.activeModel.toJSON());
       } catch (err) {
         console.error('Could not train arena:', err);
       }
