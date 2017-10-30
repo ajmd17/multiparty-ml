@@ -24,14 +24,13 @@ class Data {
   constructor(public schema: SchemaField[], public values: (number|string)[][]) {
   }
 
-  divideEvenly(count): Data[] {
+  divideEvenly(count: number): Data[] {
     if (count == 0) {
       throw Error('count must not be zero');
     }
 
-    const batchSize = Math.floor(this.values.length / count);
-
-    let results = [];
+    const batchSize: number = Math.floor(this.values.length / count);
+    const results: Data[] = [];
 
     for (let i = 0; i < count; i++) {
       results.push(this.slice(i * batchSize, i * batchSize + batchSize));
@@ -42,10 +41,13 @@ class Data {
 
   slice(start: number, end: number) {
     if (start >= 0 && start < this.values.length && end <= this.values.length) {
-      return new Data(this.schema.slice(start, end), this.values.slice(start, end));
+      return new Data(
+        this.schema.slice(start, end),
+        this.values.slice(start, end)
+      );
     }
 
-    throw Error('(' + start + ', ' + end + ') out of range of (0, ' + this.values.length + ')');
+    throw Error(`(${start}, ${end}) out of range of (0, ${this.values.length})`);
   }
 
   static from(rows: string[][], header?: string[]) {
@@ -53,7 +55,7 @@ class Data {
       throw Error('No rows provided.');
     }
 
-    let firstRowSchema = rows[0].map((element) => {
+    const firstRowSchema: DataType[] = rows[0].map((element) => {
       if (!isNaN(element as any)) {
         return DataType.NUMERICAL;
       } else if (element == 'true' || element == 'false') {
@@ -75,8 +77,8 @@ class Data {
       });
     }
 
-    return new Data(header.map((label, i) => {
-      const firstRowElement = rows[0][i];
+    return new Data(header.map((label: string, i: number) => {
+      const firstRowElement: string = rows[0][i];
 
       if (!isNaN(firstRowElement as any)) {
         return new NumericalField(label);
