@@ -1,6 +1,7 @@
 import TrainingData from '../../shared/TrainingData';
 import { ProcessingModelData } from '../../shared/ModelData';
 import forwardPropagation from '../../shared/ForwardPropagation';
+import sigmoidFunction from '../../shared/SigmoidFunction';
 
 class Model {
   constructor() {
@@ -42,6 +43,60 @@ class Trainer {
    * @param {number[]} fprop 
    */
   _learn(inputRow, outputRow, fprop) {
+    let predictedValue = this._predict(fprop);
+
+    let error = outputRow[0] - predictedValue;
+    let learningRate = 0.05;
+
+    const dimension = this.trainingData.dimension;
+
+    let dwi = new Array(dimension);
+    let dw = new Array(dimension);
+  
+    for (let i = 0; i < dimension; i++) {
+      dw[i] = new Array(dimension);
+    }
+  
+    let dbi = new Array(dimension);
+    let db = new Array(dimension);
+  
+    let dv = predictedValue * (1 - predictedValue) * error;
+
+    const [start, end] = this.trainingData.offset;
+  
+    for (let i = 0; i < dimension; i++) {
+      this._modelData.weights.v[i] += learningRate * dv * fprop[i];
+    }
+  
+    let dbout = learningRate * dv;
+    this._modelData.deltaBias += dbout;
+  
+    for (let i = 0; i < dimension; i++) {
+      dwi[i] = fprop[i] * (1 - fprop[i]) * this._modelData.weights.v[i] * dv;
+
+      for (let j = 0; j < dimension; j++) {
+        dw[j][i] = learningRate * dwi[i] * inputRow[j];
+        this._modelData.weights.w[j][i] += dw[j][i];
+      }
+    }
+  
+    // modify bias
+    for (let i = 0; i < dimension; i++) {
+      dbi[i] = fprop[i] * (1 - fprop[i]) * this._modelData.weights.v[i] * dv;
+      db[i] = learningRate * dbi[i];
+      this._modelData.bias[i] += db[i];
+    }
+  }
+
+  /**
+   * @param {number[]} fprop 
+   */
+  _predict(fprop) {
+    let value = fprop.reduce((accum, el, i) => {
+      return accum + (el * this._modelData.weights.v[i]);
+    }, 0);
+
+    return sigmoidFunction(value + this._modelData.deltaBias);
   }
 
   *_doIteration() {
@@ -73,8 +128,14 @@ class Trainer {
     }
   }
 
-  beginTraining(modelData, { onIteration=(deltas)=>{}, onDone=()=>{} }) {
-    console.log('modelData = ', modelData);
+  /**
+   * @param {ProcessingModelData} deltaModel 
+   */
+  syncDeltaUpdates(deltaModel) {
+    this._modelData.addLocalDeltaUpdates(deltaModel);
+  }
+
+  beginTraining(modelData, numIterations, { onIteration=(deltas)=>{}, onDone=()=>{} }) {
     this._modelData = new ProcessingModelData(
       modelData.weights,
       modelData.bias,
@@ -82,7 +143,7 @@ class Trainer {
     );
 
     this._trainingState = 'active';
-    this._trainingIterator = this._iterate(5);
+    this._trainingIterator = this._iterate(numIterations);
     this._iterationCallback = onIteration;
     this._trainingCallback = onDone;
     this._setupTrainingInterval();

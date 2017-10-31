@@ -1,7 +1,5 @@
 class TrainingData {
-  constructor(public inputValues: number[][], public outputValues: number[][]) {
-    this.inputValues = inputValues;
-    this.outputValues = outputValues;
+  constructor(public inputValues: number[][], public outputValues: number[][], public offset: [number, number]) {
   }
 
   get dimension(): number {

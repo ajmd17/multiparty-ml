@@ -81,6 +81,27 @@ class ProcessingModelData extends ModelData {
     }
   }
 
+  /**
+   * Modifies this object to take delta updates into account.
+   */
+  addLocalDeltaUpdates(deltaModel: ProcessingModelData): this {
+    for (let i = 0; i < deltaModel.weights.v.length; i++) {
+      this.weights.v[i] += deltaModel.weights.v[i];
+    }
+
+    for (let i = 0; i < deltaModel.weights.w.length; i++) {
+      for (let j = 0; j < deltaModel.weights.w[i].length; j++) {
+        this.weights.w[i][j] += deltaModel.weights.w[i][j];
+      }
+    }
+
+    for (let i = 0; i < deltaModel.bias.length; i++) {
+      this.bias[i] += deltaModel.bias[i];
+    }
+
+    return this;
+  }
+
   subtract(before: ProcessingModelData): ProcessingModelData {
     return new ProcessingModelData(
       {
@@ -93,7 +114,11 @@ class ProcessingModelData extends ModelData {
   }
 
   clone() {
-    return new ProcessingModelData(this.cloneWeights(), this.cloneBias(), this.deltaBias);
+    return new ProcessingModelData(
+      this.cloneWeights(),
+      this.cloneBias(),
+      this.deltaBias
+    );
   }
 
   toJSON() {

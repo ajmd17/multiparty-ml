@@ -8,6 +8,7 @@ import Trainer from '../../services/Trainer';
 class ArenaScreen extends React.Component {
   state = {
     arena: null,
+    stats: null,
     joined: false
   };
 
@@ -19,21 +20,43 @@ class ArenaScreen extends React.Component {
       console.log('update arena: ', arena);
     });
 
-    this.startTrainingListener = Client.on('start training', (modelData) => {
+    this.arenaStatsListener = Client.on('arena stats', (stats) => {
+      console.log('stats = ', stats);
+      this.setState({ stats });
+    });
+
+    this.startTrainingListener = Client.on('start training', (modelData, numIterations) => {
       if (Client.trainer == null) {
         throw Error('Client.trainer is null, init data not yet received.');
       }
 
-      Client.trainer.beginTraining(modelData,
+      Client.trainer.beginTraining(modelData, numIterations,
         {
           onIteration: (deltas) => {
-            console.log('deltas : ', deltas);
+            Client.send('delta updates', this.state.arena.id, deltas.toJSON());
           },
           onDone: (results) => {
             console.log('results = ', results);
           }
         }
       );
+    });
+
+    this.finishTrainingListener = Client.on('finish training', () => {
+      if (Client.trainer == null) {
+        throw Error('Client.trainer is null, init data not yet received.');
+      }
+
+      Client.trainer.cancelTraining();
+    });
+
+    // sync model delta updates from other clients to this client
+    this.syncDeltaUpdatesListener = Client.on('sync delta updates', (deltaModel) => {
+      if (Client.trainer == null) {
+        throw Error('Client.trainer is null, init data not yet received.');
+      }
+
+      Client.trainer.syncDeltaUpdates(deltaModel);
     });
 
     axios.get(`/api/arenas/${this.props.match.params.id}`)
@@ -45,7 +68,12 @@ class ArenaScreen extends React.Component {
 
   componentWillUnmount() {
     Client.send('unsubscribe from arena', this.props.match.params.id);
+
     this.arenaListener.remove();
+    this.arenaStatsListener.remove();
+    this.startTrainingListener.remove();
+    this.finishTrainingListener.remove();
+    this.syncDeltaUpdatesListener.remove();
   }
 
   handleJoinClick = () => {
@@ -56,6 +84,29 @@ class ArenaScreen extends React.Component {
   handleStartTrainingClick = () => {
     Client.Arena.startTraining(this.state.arena.id);
   };
+
+  renderStats() {
+    if (this.state.stats != null) {
+      return (
+        <div>
+          <h3>Progress</h3>
+          {this.state.stats.map((el, i) => {
+            return (
+              <div key={i}>
+                <span>
+                  Client #{i + 1}
+                </span>
+                &nbsp;&nbsp;&nbsp;
+                <span>
+                  {(el.completedIter / (el.assignedIter || 1) * 100).toFixed(2)}%
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+  }
 
   render() {
     if (this.state.arena == null) {
@@ -81,6 +132,7 @@ class ArenaScreen extends React.Component {
         <button disabled={this.state.arena.state != 0} onClick={this.handleStartTrainingClick}>
           Commence Training
         </button>
+        {this.renderStats()}
       </div>
     );
   };

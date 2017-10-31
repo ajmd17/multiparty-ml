@@ -21,7 +21,7 @@ class Data {
     [0]
   ]);
 
-  constructor(public schema: SchemaField[], public values: (number|string)[][]) {
+  constructor(public schema: SchemaField[], public values: (number|string)[][], public offset?: [number, number]) {
   }
 
   divideEvenly(count: number): Data[] {
@@ -43,7 +43,10 @@ class Data {
     if (start >= 0 && start < this.values.length && end <= this.values.length) {
       return new Data(
         this.schema.slice(start, end),
-        this.values.slice(start, end)
+        this.values.slice(start, end),
+        this.offset != null
+          ? [this.offset[0] + start, this.offset[1] + end]
+          : [start, end]
       );
     }
 

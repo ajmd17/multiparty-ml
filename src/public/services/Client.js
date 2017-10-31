@@ -10,8 +10,8 @@ const Client = {
 
   init() {
     this._socket = io();
-    this._socket.on('receive init data', ({ inputData, outputData }) => {
-      this._trainer = new Trainer(new TrainingData(inputData, outputData));
+    this._socket.on('receive init data', ({ inputData, outputData, offset }) => {
+      this._trainer = new Trainer(new TrainingData(inputData, outputData, offset));
     });
   },
 

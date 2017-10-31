@@ -15,10 +15,11 @@ class ClientConnection {
     return this._id;
   }
 
-  sendInitData(inputData: Data, outputData: Data) {
+  sendInitData(inputData: (string|number)[][], outputData: (string|number)[][], offset: [number, number]) {
     this._socket.emit('receive init data', {
-      inputData: inputData.values,
-      outputData: outputData.values
+      inputData,
+      outputData,
+      offset
     });
   }
 }

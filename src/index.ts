@@ -65,7 +65,7 @@ app.get('/arenas/:id/train', (req, res) => {
 
   // for testing
   try {
-    arena.beginTraining(DEFAULT_INPUT_DATA, DEFAULT_OUTPUT_DATA);
+    arena.beginTraining(DEFAULT_INPUT_DATA, DEFAULT_OUTPUT_DATA, 1000);
 
     res.json({
       message: 'Training started'
